@@ -1,119 +1,101 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Chat } from "@google/genai";
 import { AnalysisResult } from "../types";
 
-export class GeminiAnalyzer {
-  constructor() {}
+export class GeminiService {
+  private ai: GoogleGenAI;
+
+  constructor() {
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  }
 
   async analyzeResume(resumeText: string, jdText?: string, resumeFile?: { data: string, mimeType: string }): Promise<AnalysisResult> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-    const model = 'gemini-3-flash-preview';
-    
-    const isGeneralAnalysis = !jdText || jdText.trim().length === 0;
+    const aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const model = 'gemini-3-pro-preview';
+    const isGeneral = !jdText || jdText.trim().length === 0;
 
     const prompt = `
-      Act as a high-tier executive recruiter and ATS algorithm engineer. 
-      ${isGeneralAnalysis 
-        ? "Perform an ELITE PROFESSIONAL AUDIT of this resume. Evaluate market readiness, readability, and impact." 
-        : "Perform a DEEP ARCHITECTURAL MATCH of the Resume against the provided Job Description."}
+      Act as an elite career mentor. Your goal is to analyze a resume with precision and provide simple, actionable feedback.
       
-      ${!isGeneralAnalysis ? `TARGET JOB DESCRIPTION:\n${jdText}` : "ANALYSIS CONTEXT: Global Tech & Business Standards"}
+      ${isGeneral 
+        ? "Evaluate this resume's overall strength for high-tier professional roles." 
+        : "Compare this resume against the following job description and find the gaps."}
       
-      CANDIDATE RESUME SOURCE:
+      ${!isGeneral ? `TARGET JOB:\n${jdText}` : "CONTEXT: Modern High-Impact Careers"}
+      
+      RESUME DATA:
       ${resumeText}
 
-      INSTRUCTIONS:
-      1. Extract and categorize skills strictly.
-      2. Audit content for: Readability, Action Verbs, and Quantifiable Achievements.
-      3. Calculate 7 distinct metrics based on industry benchmarks.
-      
-      Return valid JSON following this exact schema:
-      {
-        "scores": {
-          "keywordMatch": number (0-100),
-          "semanticSimilarity": number (0-100),
-          "educationRelevance": number (0-100),
-          "experienceScore": number (0-100),
-          "readabilityScore": number (0-100),
-          "impactScore": number (0-100),
-          "formattingScore": number (0-100),
-          "finalAtsScore": number (0-100)
-        },
-        "details": {
-          "matchedKeywords": string[],
-          "missingKeywords": string[],
-          "skillsAnalysis": Array<{ "skill": string, "found": boolean, "category": "technical" | "soft" | "domain" | "tool" }>,
-          "strengths": string[],
-          "weaknesses": string[],
-          "improvementSuggestions": string[],
-          "contentAudit": {
-            "bulletPointQuality": string,
-            "activeVerbUsage": string,
-            "quantifiableResults": string
-          },
-          "rolePotential": string[]
-        },
-        "explanation": string
-      }
+      OUTPUT SPECIFICATIONS:
+      Return a JSON object. Scores must be between 0 and 100.
+      Required fields:
+      - scores: { keywordMatch, semanticSimilarity, educationRelevance, experienceScore, readabilityScore, impactScore, formattingScore, finalAtsScore }
+      - details: { matchedKeywords, missingKeywords, skillsAnalysis, strengths, weaknesses, improvementSuggestions, contentAudit, rolePotential }
+      - explanation: A simple, punchy, one-sentence summary of the overall verdict. Avoid jargon.
     `;
 
     try {
       const parts: any[] = [{ text: prompt }];
-      
       if (resumeFile) {
-        parts.push({
-          inlineData: {
-            data: resumeFile.data,
-            mimeType: resumeFile.mimeType
-          }
-        });
+        parts.push({ inlineData: { data: resumeFile.data, mimeType: resumeFile.mimeType } });
       }
 
-      const response = await ai.models.generateContent({
+      const response = await aiInstance.models.generateContent({
         model,
         contents: { parts },
-        config: {
+        config: { 
           responseMimeType: "application/json",
-          temperature: 0.15,
+          thinkingConfig: { thinkingBudget: 2000 } 
         },
       });
 
-      const resultText = response.text || '{}';
-      const cleanJson = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanJson = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(cleanJson);
-
-      const fallback: AnalysisResult = {
-        scores: {
-          keywordMatch: parsed?.scores?.keywordMatch ?? 0,
-          semanticSimilarity: parsed?.scores?.semanticSimilarity ?? 0,
-          educationRelevance: parsed?.scores?.educationRelevance ?? 0,
-          experienceScore: parsed?.scores?.experienceScore ?? 0,
-          readabilityScore: parsed?.scores?.readabilityScore ?? 0,
-          impactScore: parsed?.scores?.impactScore ?? 0,
-          formattingScore: parsed?.scores?.formattingScore ?? 0,
-          finalAtsScore: parsed?.scores?.finalAtsScore ?? 0
-        },
-        details: {
-          matchedKeywords: parsed?.details?.matchedKeywords ?? [],
-          missingKeywords: parsed?.details?.missingKeywords ?? [],
-          skillsAnalysis: parsed?.details?.skillsAnalysis ?? [],
-          strengths: parsed?.details?.strengths ?? [],
-          weaknesses: parsed?.details?.weaknesses ?? [],
-          improvementSuggestions: parsed?.details?.improvementSuggestions ?? [],
-          contentAudit: {
-            bulletPointQuality: parsed?.details?.contentAudit?.bulletPointQuality ?? "Analyzing...",
-            activeVerbUsage: parsed?.details?.contentAudit?.activeVerbUsage ?? "Analyzing...",
-            quantifiableResults: parsed?.details?.contentAudit?.quantifiableResults ?? "Analyzing..."
-          },
-          rolePotential: parsed?.details?.rolePotential ?? []
-        },
-        explanation: parsed?.explanation ?? "Analysis complete."
-      };
-
-      return fallback;
+      
+      // Ensure explanation is always a string to avoid split() errors in UI
+      if (typeof parsed.explanation !== 'string') {
+        parsed.explanation = "Your profile shows strong potential with specific areas for optimization.";
+      }
+      
+      return parsed;
     } catch (error) {
-      console.error("Analysis Error:", error);
-      throw new Error("Pipeline interrupted. Please check inputs.");
+      console.error("Deep Analysis Error:", error);
+      throw new Error("The AI engine is busy. Please try again in a moment.");
     }
+  }
+
+  async editImage(base64Image: string, mimeType: string, prompt: string): Promise<string> {
+    const aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const model = 'gemini-2.5-flash-image';
+    try {
+      const response = await aiInstance.models.generateContent({
+        model,
+        contents: {
+          parts: [
+            { inlineData: { data: base64Image, mimeType } },
+            { text: prompt }
+          ]
+        }
+      });
+
+      for (const part of response.candidates?.[0]?.content?.parts || []) {
+        if (part.inlineData) {
+          return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+      }
+      throw new Error("Visual processing failed.");
+    } catch (error) {
+      console.error("Image Error:", error);
+      throw error;
+    }
+  }
+
+  createChatSession(): Chat {
+    return this.ai.chats.create({
+      model: 'gemini-3-pro-preview',
+      config: {
+        systemInstruction: "You are ZENITH, a world-class career strategist. Speak simply. Be bold but friendly. Help the user win. Use only Emerald and Orange colors in your personality. Never mention blue or violet."
+      }
+    });
   }
 }

@@ -33,6 +33,11 @@ export interface AnalysisResult {
   explanation: string;
 }
 
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text: string;
+}
+
 export interface AnalysisState {
   isAnalyzing: boolean;
   result: AnalysisResult | null;

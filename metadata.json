@@ -1,5 +1,8 @@
 {
-  "name": "Smart-ATS Resume Analyzer",
-  "description": "An academic-grade resume analysis tool that uses NLP and Gemini LLM to provide transparent scoring, skill gap analysis, and improvement suggestions for final year projects.",
-  "requestFramePermissions": []
+  "name": "ZENITH CAREER",
+  "description": "Industrial-grade career quantification suite. Simple, bold, and powerful AI for the modern professional.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
 }

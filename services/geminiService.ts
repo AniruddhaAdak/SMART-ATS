@@ -56,21 +56,22 @@ export class GeminiService {
     };
 
     const prompt = `
-      Act as a friendly career coach. Review this resume using simple language.
+      Act as a high-precision career auditor. 
+      Analyze this resume text and provide a strict, data-driven report.
       
       ${isGeneral 
-        ? "Give a simple review of how good this resume is for job hunting." 
-        : "Explain clearly how well this resume fits this specific job."}
+        ? "Audit this resume for overall marketability and ATS compatibility." 
+        : "Compare this resume against the following JOB DESCRIPTION precisely."}
       
       ${!isGeneral ? `JOB DESCRIPTION:\n${jdText}` : ""}
       
-      RESUME TEXT:
+      RESUME DATA:
       ${resumeText}
 
       INSTRUCTIONS:
-      1. Use simple, everyday words. Avoid jargon.
-      2. Be encouraging but honest.
-      3. Return a valid JSON object.
+      1. Be honest and sharp. Identify exactly where the user is losing points.
+      2. Keep the 'explanation' field short (under 50 words) and high-impact.
+      3. Use valid JSON only.
     `;
 
     try {
@@ -101,18 +102,28 @@ export class GeminiService {
 
   createChatSession(context?: AnalysisResult): Chat {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const contextStr = context ? `I analyzed their resume: ${JSON.stringify(context)}` : "No resume analyzed yet.";
+    const contextStr = context ? `CURRENT AUDIT DATA: ${JSON.stringify(context)}` : "No resume analyzed yet.";
     
     return ai.chats.create({
       model: 'gemini-3-pro-preview',
       config: {
-        systemInstruction: `You are a friendly and simple career coach named Zenith. 
+        systemInstruction: `You are ZENITH, an elite AI Career Strategist.
+        
         ${contextStr}
-        RULES:
-        1. Use VERY simple English. No big words.
-        2. NO markdown (no #, *, **).
-        3. Keep answers short (1-3 sentences).
-        4. Be helpful and kind.`
+        
+        STRICT RULES TO PREVENT LOOPS & REPETITION:
+        1. NEVER repeat the same sentence or phrase twice in one response.
+        2. DO NOT list "Role Validation" repeatedly.
+        3. BE PRECISE. Use max 3 paragraphs.
+        4. Use **BOLD** for keywords and *Italic* for actionable steps.
+        5. Mandatory: Start key points with these tags for the UI:
+           - [WIN]: Strength or match.
+           - [GAP]: Missing skill/weakness.
+           - [ACTION]: Immediate task.
+           - [STRATEGY]: Long-term career move.
+        6. Always cross-reference the CURRENT AUDIT DATA provided. 
+        7. If a resume has been uploaded, immediately acknowledge the specific scores (e.g. "Your Impact score is ${context?.scores?.impactScore || 'low'}").
+        8. Maintain a professional yet sharp and colorful tone.`
       }
     });
   }

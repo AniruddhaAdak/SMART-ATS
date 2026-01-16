@@ -23,6 +23,13 @@ export interface AnalysisResult {
     strengths: string[];
     weaknesses: string[];
     improvementSuggestions: string[];
+    immediateWins: string[];
+    longTermStrategy: string[];
+    roadmap: {
+      phase1: string;
+      phase2: string;
+      phase3: string;
+    };
     contentAudit: {
       bulletPointQuality: string;
       activeVerbUsage: string;

@@ -7,23 +7,24 @@ export const SCORING_WEIGHTS = {
 };
 
 export const SCORE_EXPLANATIONS = {
-  keywordMatch: "How well your words match the job requirements.",
-  semanticSimilarity: "How well your overall profile fits the role's meaning.",
-  educationRelevance: "Checks if your schooling matches the job level.",
-  experienceScore: "Looks at your years of work and job titles.",
-  readabilityScore: "How easy it is for a person or machine to read your resume.",
-  impactScore: "Checks for numbers and results that show your success.",
-  formattingScore: "Ensures your layout is clean and consistent.",
-  finalAtsScore: "A total score based on keywords, meaning, school, and work history."
+  keywordMatch: "Precision mapping of core technical and industry keywords.",
+  semanticSimilarity: "Deep context evaluation of your professional narrative.",
+  educationRelevance: "Academic alignment with target seniority and domain.",
+  experienceScore: "Quantitative audit of tenure and role progression.",
+  readabilityScore: "Parsing efficiency for both human and algorithmic eyes.",
+  impactScore: "Metric-driven success and quantifiable achievement density.",
+  formattingScore: "Structural integrity and layout professionality.",
+  finalAtsScore: "Comprehensive career quantification index."
 };
 
-export const MOCK_JOB_DESCRIPTIONS = [
-  {
-    title: "Executive Director",
-    content: "We need a leader with 10+ years experience. Focus on strategy, growth, and team building."
-  },
-  {
-    title: "Software Engineer",
-    content: "Seeking a builder who knows Python and React. Focus on clean code and solving hard problems."
-  }
+export const LOADING_MESSAGES = [
+  "Quantifying skill density...",
+  "Calibrating ATS heuristics...",
+  "Parsing professional narrative...",
+  "Auditing impact metrics...",
+  "Mapping semantic trajectories...",
+  "Synthesizing career roadmap...",
+  "Evaluating executive presence...",
+  "Optimizing keyword placement...",
+  "Refining industrial alignment..."
 ];

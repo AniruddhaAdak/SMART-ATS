@@ -15,23 +15,32 @@ export class GeminiService {
     const isGeneral = !jdText || jdText.trim().length === 0;
 
     const prompt = `
-      Act as an elite career mentor. Your goal is to analyze a resume with precision and provide simple, actionable feedback.
+      Act as an elite career strategist. Conduct a deep-dive audit of this resume.
       
       ${isGeneral 
-        ? "Evaluate this resume's overall strength for high-tier professional roles." 
-        : "Compare this resume against the following job description and find the gaps."}
+        ? "Analyze the overall marketability and executive presence of this resume." 
+        : "Perform a high-precision gap analysis against the target job description."}
       
-      ${!isGeneral ? `TARGET JOB:\n${jdText}` : "CONTEXT: Modern High-Impact Careers"}
+      ${!isGeneral ? `TARGET JOB:\n${jdText}` : "CONTEXT: High-Growth Modern Industry"}
       
-      RESUME DATA:
+      RESUME CONTENT:
       ${resumeText}
 
       OUTPUT SPECIFICATIONS:
-      Return a JSON object. Scores must be between 0 and 100.
-      Required fields:
+      Return a STRICT JSON object with these fields:
       - scores: { keywordMatch, semanticSimilarity, educationRelevance, experienceScore, readabilityScore, impactScore, formattingScore, finalAtsScore }
-      - details: { matchedKeywords, missingKeywords, skillsAnalysis, strengths, weaknesses, improvementSuggestions, contentAudit, rolePotential }
-      - explanation: A simple, punchy, one-sentence summary of the overall verdict. Avoid jargon.
+      - details: { 
+          matchedKeywords: string[], 
+          missingKeywords: string[], 
+          strengths: string[], 
+          weaknesses: string[], 
+          improvementSuggestions: string[], 
+          immediateWins: string[], 
+          longTermStrategy: string[], 
+          roadmap: { phase1: string, phase2: string, phase3: string }, 
+          rolePotential: string[] 
+        }
+      - explanation: A simple, punchy, one-sentence overall verdict in italics.
     `;
 
     try {
@@ -45,56 +54,28 @@ export class GeminiService {
         contents: { parts },
         config: { 
           responseMimeType: "application/json",
-          thinkingConfig: { thinkingBudget: 2000 } 
+          thinkingConfig: { thinkingBudget: 2500 } 
         },
       });
 
       const cleanJson = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
-      
-      // Ensure explanation is always a string to avoid split() errors in UI
-      if (typeof parsed.explanation !== 'string') {
-        parsed.explanation = "Your profile shows strong potential with specific areas for optimization.";
-      }
-      
-      return parsed;
+      return JSON.parse(cleanJson);
     } catch (error) {
       console.error("Deep Analysis Error:", error);
-      throw new Error("The AI engine is busy. Please try again in a moment.");
+      throw new Error("Analysis engine encountered a processing error. Please retry.");
     }
   }
 
-  async editImage(base64Image: string, mimeType: string, prompt: string): Promise<string> {
-    const aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-    const model = 'gemini-2.5-flash-image';
-    try {
-      const response = await aiInstance.models.generateContent({
-        model,
-        contents: {
-          parts: [
-            { inlineData: { data: base64Image, mimeType } },
-            { text: prompt }
-          ]
-        }
-      });
-
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
-        if (part.inlineData) {
-          return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        }
-      }
-      throw new Error("Visual processing failed.");
-    } catch (error) {
-      console.error("Image Error:", error);
-      throw error;
-    }
-  }
-
-  createChatSession(): Chat {
+  createChatSession(context?: AnalysisResult): Chat {
+    const contextStr = context ? `HERE IS THE USER'S ANALYSIS CONTEXT: ${JSON.stringify(context)}. Use this to answer their questions about their resume.` : "The user hasn't analyzed their resume yet.";
+    
     return this.ai.chats.create({
       model: 'gemini-3-pro-preview',
       config: {
-        systemInstruction: "You are ZENITH, a world-class career strategist. Speak simply. Be bold but friendly. Help the user win. Use only Emerald and Orange colors in your personality. Never mention blue or violet."
+        systemInstruction: `You are ZENITH, an elite AI career strategist. 
+        ${contextStr}
+        Use simple, bold, and inspiring language. Always italicize key insights. 
+        Focus on actionable, high-impact career advice. Be professional and encouraging.`
       }
     });
   }

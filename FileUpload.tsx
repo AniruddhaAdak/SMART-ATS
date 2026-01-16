@@ -41,14 +41,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, label, accept }) 
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
         <div className="flex flex-col items-center justify-center space-y-6">
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-700 ${selectedFile ? 'bg-emerald-500 shadow-xl shadow-emerald-500/30 scale-110' : 'bg-white/5 group-hover:bg-white/10 rotate-12 group-hover:rotate-0'}`}>
-            <i className={`fa-solid ${selectedFile ? 'fa-check text-[#050505]' : 'fa-arrow-up-from-bracket text-white/40 group-hover:text-white'} text-xl`}></i>
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-700 ${selectedFile ? 'bg-emerald-500 shadow-xl shadow-emerald-500/30' : 'bg-white/5 group-hover:bg-white/10'}`}>
+            <i className={`fa-solid ${selectedFile ? 'fa-check text-[#050505]' : 'fa-plus text-white/40 group-hover:text-white'} text-xl`}></i>
           </div>
           <div className="text-center">
             <span className={`block text-[11px] font-black uppercase tracking-[0.3em] italic transition-colors ${selectedFile ? 'text-emerald-400' : 'text-stone-500 group-hover:text-stone-300'}`}>
               {selectedFile ? selectedFile.name : label}
             </span>
-            <span className="block mt-3 text-[9px] font-black text-stone-700 uppercase tracking-[0.6em] italic">DEPLOY PDF / IMAGE</span>
+            <span className="block mt-3 text-[9px] font-black text-stone-700 uppercase tracking-[0.6em] italic">PDF or Image</span>
           </div>
         </div>
       </div>

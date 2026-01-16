@@ -7,25 +7,25 @@ export const SCORING_WEIGHTS = {
 };
 
 export const SCORE_EXPLANATIONS = {
-  keywordMatch: "Precision mapping of core technical and industry heuristics.",
-  semanticSimilarity: "Deep contextual evaluation of your professional narrative.",
-  educationRelevance: "Academic alignment with target seniority and industrial domain.",
-  experienceScore: "Quantitative audit of professional tenure and role progression.",
-  readabilityScore: "Parsing efficiency for both human and algorithmic vision systems.",
-  impactScore: "Metric-driven success and quantifiable achievement density.",
-  formattingScore: "Structural integrity and layout professionality index.",
-  finalAtsScore: "Comprehensive industrial career quantification index."
+  keywordMatch: "How well your skills match the words in the job description.",
+  semanticSimilarity: "How well your overall experience fits what the employer wants.",
+  educationRelevance: "How well your degrees or certifications match the job.",
+  experienceScore: "How well your work history matches the required years and level.",
+  readabilityScore: "How easy it is for a computer or a person to read your resume.",
+  impactScore: "How well you show results and achievements with numbers.",
+  formattingScore: "How professional and clean your resume looks.",
+  finalAtsScore: "Your total score. Higher is better for passing automatic filters."
 };
 
 export const LOADING_MESSAGES = [
-  "Quantifying skill density...",
-  "Calibrating ATS heuristics...",
-  "Parsing professional narrative...",
-  "Auditing impact metrics...",
-  "Mapping semantic trajectories...",
-  "Synthesizing career roadmap...",
-  "Evaluating executive presence...",
-  "Optimizing keyword placement...",
-  "Refining industrial alignment...",
-  "Synchronizing career objectives..."
+  "Looking at your skills...",
+  "Checking the job requirements...",
+  "Reading your work history...",
+  "Finding ways to improve...",
+  "Checking for important keywords...",
+  "Comparing your resume to the job...",
+  "Looking for missing information...",
+  "Analyzing your achievements...",
+  "Making a plan for you...",
+  "Almost ready..."
 ];

@@ -13,11 +13,11 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ file, text }) => {
     <div className="bg-black/40 rounded-[2.5rem] border border-white/5 h-full flex flex-col group transition-all duration-700">
       <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
         <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/40 flex items-center italic">
-          <i className="fa-solid fa-eye mr-4 text-emerald-500"></i>
-          Credential View
+          <i className="fa-solid fa-file mr-4 text-emerald-500"></i>
+          Your File
         </h3>
         <span className="text-[10px] font-black text-white/20 truncate max-w-[180px] italic uppercase tracking-widest">
-          {file ? file.name : 'RAW SOURCE'}
+          {file ? file.name : 'TEXT INPUT'}
         </span>
       </div>
       <div className="flex-1 p-10 overflow-y-auto scrollbar-hide">
@@ -28,10 +28,10 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ file, text }) => {
             title="Resume View"
           />
         ) : file && file.mimeType.startsWith('image/') ? (
-           <img src={`data:${file.mimeType};base64,${file.data}`} className="w-full rounded-3xl opacity-80 grayscale hover:grayscale-0 transition-all duration-700" alt="Resume" />
+           <img src={`data:${file.mimeType};base64,${file.data}`} className="w-full rounded-3xl opacity-80 grayscale" alt="Resume" />
         ) : (
           <div className="font-sans text-[14px] text-stone-500 leading-relaxed whitespace-pre-wrap italic font-bold">
-            {text || "Data synchronization pending..."}
+            {text || "Nothing to show yet."}
           </div>
         )}
       </div>

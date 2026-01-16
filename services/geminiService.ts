@@ -4,16 +4,12 @@ import { GoogleGenAI, Chat, Type, GenerateContentResponse } from "@google/genai"
 import { AnalysisResult } from "../types";
 
 export class GeminiService {
-  // Guidelines: Create a new GoogleGenAI instance right before making an API call 
-  // to ensure it always uses the most up-to-date API key.
 
   async analyzeResume(resumeText: string, jdText?: string, resumeFile?: { data: string, mimeType: string }): Promise<AnalysisResult> {
-    // Guidelines: Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) directly.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const model = 'gemini-3-pro-preview';
     const isGeneral = !jdText || jdText.trim().length === 0;
 
-    // Guidelines: Use responseSchema for structured JSON output.
     const responseSchema = {
       type: Type.OBJECT,
       properties: {
@@ -60,19 +56,21 @@ export class GeminiService {
     };
 
     const prompt = `
-      Act as an elite career strategist. Conduct a high-fidelity audit of this resume.
+      Act as a friendly career coach. Review this resume using simple language.
       
       ${isGeneral 
-        ? "Analyze the overall marketability and executive presence of this resume." 
-        : "Perform a high-precision gap analysis against the target job description requirements."}
+        ? "Give a simple review of how good this resume is for job hunting." 
+        : "Explain clearly how well this resume fits this specific job."}
       
-      ${!isGeneral ? `TARGET JOB PARAMETERS:\n${jdText}` : "CONTEXT: Modern High-Growth Global Industry"}
+      ${!isGeneral ? `JOB DESCRIPTION:\n${jdText}` : ""}
       
-      USER RESUME DATA:
+      RESUME TEXT:
       ${resumeText}
 
-      STRICT OUTPUT SPECIFICATIONS:
-      Return a VALID JSON object. Ensure all numeric scores are between 0 and 100.
+      INSTRUCTIONS:
+      1. Use simple, everyday words. Avoid jargon.
+      2. Be encouraging but honest.
+      3. Return a valid JSON object.
     `;
 
     try {
@@ -81,43 +79,40 @@ export class GeminiService {
         parts.push({ inlineData: { data: resumeFile.data, mimeType: resumeFile.mimeType } });
       }
 
-      // Guidelines: Use ai.models.generateContent and response.text property.
       const response: GenerateContentResponse = await ai.models.generateContent({
         model,
         contents: { parts },
         config: { 
           responseMimeType: "application/json",
           responseSchema,
-          thinkingConfig: { thinkingBudget: 32768 } // Max budget for gemini-3-pro-preview
+          thinkingConfig: { thinkingBudget: 1000 }
         },
       });
 
       const text = response.text;
-      if (!text) throw new Error("Empty response from AI");
+      if (!text) throw new Error("No response");
       
       return JSON.parse(text);
     } catch (error) {
-      console.error("Deep Analysis Error:", error);
-      throw new Error("Industrial Career Engine encountered a synchronization fault. Please re-initiate audit.");
+      console.error("Analysis Error:", error);
+      throw new Error("Could not analyze your resume. Please try again.");
     }
   }
 
   createChatSession(context?: AnalysisResult): Chat {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const contextStr = context ? `CURRENT USER AUDIT CONTEXT: ${JSON.stringify(context)}. Use this data to answer accurately.` : "User has not analyzed a resume yet.";
+    const contextStr = context ? `I analyzed their resume: ${JSON.stringify(context)}` : "No resume analyzed yet.";
     
-    // Guidelines: Use ai.chats.create for conversational interaction.
     return ai.chats.create({
       model: 'gemini-3-pro-preview',
       config: {
-        systemInstruction: `You are ZENITH, an elite AI career strategist. 
+        systemInstruction: `You are a friendly and simple career coach named Zenith. 
         ${contextStr}
-        IDENTITY RULES:
-        1. NEVER use markdown symbols like #, ##, ###, **, or __.
-        2. Keep responses short, precise, and friendly. 
-        3. Use simple line breaks for formatting.
-        4. Focus on high-impact actionable advice based on the user's specific audit scores and roadmap.
-        5. Use simple text for emphasis if needed. No bolding or italics markdown.`
+        RULES:
+        1. Use VERY simple English. No big words.
+        2. NO markdown (no #, *, **).
+        3. Keep answers short (1-3 sentences).
+        4. Be helpful and kind.`
       }
     });
   }
